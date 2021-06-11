@@ -1,0 +1,34 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.3.
+--
+-- see: https://github.com/sol/hpack
+
+name:           sum-of-square-roots-close-to-integer
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/sseefried/sum-of-square-roots-close-to-integer#readme>
+homepage:       https://github.com/sseefried/sum-of-square-roots-close-to-integer#readme
+bug-reports:    https://github.com/sseefried/sum-of-square-roots-close-to-integer/issues
+author:         Sean Seefried
+maintainer:     sean@seefried.com.au
+copyright:      Copyright 2021 and beyond
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/sseefried/sum-of-square-roots-close-to-integer
+
+executable sum-of-square-roots-close-to-integer-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_sum_of_square_roots_close_to_integer
+  hs-source-dirs:
+      src
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
