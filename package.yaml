@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/ssee
 
 dependencies:
 - base >= 4.7 && < 5
+- HasBigDecimal == 0.1.1
 
 executables:
   sum-of-square-roots-close-to-integer-exe:
@@ -30,3 +31,4 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -O2
