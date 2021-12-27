@@ -1,44 +1,44 @@
 module Main where
 
 import Data.List
-import Data.BigDecimal
-import Data.BigFloating
 import Debug.Trace
 
 
-ctx :: MathContext
-ctx = (HALF_UP, Just 0)
+--ctx :: MathContext
+--ctx = (HALF_UP, Just 0)
 
 places = 10
 
-sqrtPrec :: MathContext
-sqrtPrec = (HALF_UP, Just places)
+bias = 0.0
+
+--sqrtPrec :: MathContext
+--sqrtPrec = (HALF_UP, Just places)
+
+
+
 
 main :: IO ()
 main = do
-  let result = test
-  mapM_ (\x -> putStrLn $ show x) $ map (\(x,y,z,_) -> (x,y,z)) $ result
-  putStrLn $ "epsilon = " ++ show epsilon
-  let numResults = length result
-  putStrLn $ "number of pairs = " ++ show numResults
-  let manyNines = filter (\(_,_,_,sum) -> abs (roundBD sum ctx) > abs sum) result
-  let numManyNines = length manyNines
-  putStrLn $ "number of pairs whose sum is just below = " ++ show (length manyNines)
-  putStrLn $ "percentage = " ++ show ((fromIntegral numManyNines)/(fromIntegral numResults) * 100.0)
+  let result = sequenceUpToM 10000
+  mapM_ (\x -> putStrLn $ show x) $ result
 
-toFractional :: Integer -> BigDecimal
+
+rnd :: Double -> Double
+rnd a = fromIntegral (round a)
+
+toFractional :: Integer -> Double
 toFractional n = fromInteger n
 
 -- search numbers less than maxNum
-maxNumX = 500
-maxNumY = 500
+maxNumX = 250
+maxNumY = 250
 
--- Find sums this close to an integer
-epsilon :: BigDecimal
-epsilon = 0.0001
+-- Find sums this close to an integer or better
+epsilon :: Double
+epsilon = 0.001
 
 nonIntegerSqrt :: Integer -> Bool
-nonIntegerSqrt n = roundBD s ctx  /= s
+nonIntegerSqrt n = rnd s   /= s
   where
     s = mySqrt n
 
@@ -51,9 +51,39 @@ testPair n m =
     sqrtN = mySqrt n
     sqrtM = mySqrt m
 
-    d = abs (v - roundBD v ctx)
+    d = distance v
     v = sqrtN + sqrtM
-    notPerfect = d > BigDecimal 1 places
+    notPerfect = d > 0.0000000001
+
+-- distance to integer
+distance v = abs (v - rnd v + bias)
+
+distance' (a, b) = distance (mySqrt a + mySqrt b)
+
+notPerfect n = mySqrt n /= rnd (mySqrt n)
+
+notBoring m n = notPerfect m && notPerfect n
+
+testForN best n = (a, b)
+  where
+    (a, b) = go best 1 n
+    go best@(a, b) m n
+      | m <= n =
+        let e = distance' (m, n)
+            best' = if e < distance' best && notBoring m n then (m, n) else best
+        in  go best' (m+1) n
+      | otherwise = best
+
+sequenceUpToM m = map withSum $ go first 2
+  where
+    withSum (a,b) = ((a,b), mySqrt a + mySqrt b)
+    first = (1,2)
+    go best n | n <= m =
+                  let best' = testForN best n
+                  in if best' /= best then best : go best' (n+1) else go best (n+1)
+              | otherwise = [best]
+
+
 
 testList = test' 1 1
   where
@@ -65,7 +95,10 @@ test = map getPair $ sortBy compareD $ filter fst testList
   where
     compareD a b = compare (getD a) (getD b)
     getD (_, (_, _, _, d)) = d
-    getPair (_, (x, y, v, _)) = (x,y, toString v, v)
+    getPair (_, (x, y, v, _)) = (x,y, show v, v)
 
-mySqrt n = sqr (toFractional n) sqrtPrec
+mySqrt n = sqrt (toFractional n) 
+
+
+
 
